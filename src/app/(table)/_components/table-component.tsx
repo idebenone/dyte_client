@@ -26,7 +26,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -90,7 +89,6 @@ export function TableComponent<TData, TValue>({
   return (
     <div>
       <div className="rounded-md border mt-6">
-        {/* <ScrollArea className="h-[600px]"> */}
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -139,7 +137,6 @@ export function TableComponent<TData, TValue>({
             )}
           </TableBody>
         </Table>
-        {/* </ScrollArea> */}
       </div>
 
       <div className="flex items-center justify-end space-x-2 py-4">
@@ -151,6 +148,9 @@ export function TableComponent<TData, TValue>({
         >
           Previous
         </Button>
+        <p className="font-semibold text-sm text-muted-foreground">
+          {query.page} / {dataCount}
+        </p>
         <Button
           variant="outline"
           size="sm"

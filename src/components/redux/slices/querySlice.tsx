@@ -2,6 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface ParamsInterface {
   page: number;
+  level: string | undefined;
   startDate: string | undefined;
   endDate: string | undefined;
   searchText: string | undefined;
@@ -9,6 +10,7 @@ interface ParamsInterface {
 
 const initialState: ParamsInterface = {
   page: 1,
+  level: undefined,
   startDate: undefined,
   endDate: undefined,
   searchText: undefined,

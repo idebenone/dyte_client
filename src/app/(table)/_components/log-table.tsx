@@ -2,24 +2,28 @@
 
 import React, { useEffect, useState } from "react";
 import { RootState } from "@/components/redux/store";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import debounce from "lodash/debounce";
 
-import { Filters } from "./filters";
-import { TableComponent } from "./table";
+import { Filters } from "./filter-component";
+import { TableComponent } from "./table-component";
 import { Input } from "@/components/ui/input";
 import { fetchLogs } from "@/components/api";
 
 import { columns } from "./columns";
 import { formatDate } from "@/components/utils";
+import { setLogs } from "@/components/redux/slices/logSlice";
+import { ConnectionStatus } from "@/app/_components/connection-status";
 
 export function LogTable() {
+  const dispatch = useDispatch();
   const query = useSelector((state: RootState) => state.query);
-  const [logs, setLogs] = useState([]);
-  const [logsCount, setLogsCount] = useState<number>(0);
+  const logState = useSelector((state: RootState) => state.logs);
+  const [modifiedLogs, setModifiedLogs] = useState([]);
 
   const q =
     `page=${query.page} ` +
+    `level=${query.level} ` +
     `startDate=${query.startDate} ` +
     `endDate=${query.endDate} ` +
     `searchText=${query.searchText}`;
@@ -27,13 +31,7 @@ export function LogTable() {
   const debouncedFetchData = debounce(async (queryParams) => {
     try {
       const fetchedData: any = await fetchLogs(queryParams);
-      const modifiedData: any = fetchedData.logs.map((item: any) => ({
-        ...item,
-        parentId: item.metadata?.parentResourceId || "",
-        timestamp: formatDate(item.timestamp),
-      }));
-      setLogs(modifiedData);
-      setLogsCount(fetchedData.count);
+      dispatch(setLogs(fetchedData));
     } catch (error) {
       console.error("Error fetching logs:", error);
     }
@@ -46,10 +44,24 @@ export function LogTable() {
     };
   }, [query]);
 
+  useEffect(() => {
+    const modifiedData: any = logState.logs.map((item) => ({
+      ...item,
+      parentId: item.metadata?.parentResourceId || "",
+      timestamp: formatDate(item.timestamp),
+    }));
+    setModifiedLogs(modifiedData);
+  }, [logState.logs]);
+
   return (
     <div className="w-3/4">
+      <ConnectionStatus />
       <Filters />
-      <TableComponent columns={columns} data={logs} dataCount={logsCount} />
+      <TableComponent
+        columns={columns}
+        data={modifiedLogs}
+        dataCount={logState.count}
+      />
 
       <div className="mt-6">
         <p className="text-lg font-bold text-primary">QUERY STATE</p>

@@ -1,36 +1,44 @@
 "use client";
 
+import { useDispatch } from "react-redux";
+import { useState } from "react";
+import { setParams } from "@/components/redux/slices/querySlice";
+
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Calendar } from "@/components/ui/calendar";
-import { Slider } from "@/components/ui/slider";
-import { ChevronsRight, PlusCircleIcon, Sparkles } from "lucide-react";
+import { DateRange } from "react-day-picker";
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { cn } from "@/lib/utils";
 import { addDays, format } from "date-fns";
+import { FilterIcon } from "lucide-react";
 
-import { useState } from "react";
-import { DateRange } from "react-day-picker";
-import { useDispatch } from "react-redux";
-import { setParams } from "@/components/redux/slices/querySlice";
-import { ModeToggle } from "@/app/_components/mode-toggle";
+import { CTA } from "./cta-component";
 
 export const Filters = () => {
-  const [count, setCount] = useState(0);
   const dispatch = useDispatch();
   const [date, setDate] = useState<DateRange | undefined>({
     from: new Date(),
     to: addDays(new Date(), 20),
   });
-  const [dateFilActive, isDateFilActive] = useState(false);
+  const [dateFilterActive, setDateFilterActive] = useState(false);
+  const [levelFilterActive, setLevelFilterActive] = useState(false);
   const [query, setQuery] = useState({
     page: 1,
+    level: undefined,
     startDate: undefined,
     endDate: undefined,
     searchText: undefined,
@@ -43,39 +51,50 @@ export const Filters = () => {
   };
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    updateQuery({ searchText: event.target.value });
+    event.target.value
+      ? updateQuery({ searchText: event.target.value })
+      : updateQuery({ searchText: undefined });
   };
 
   const handleDateFilter = (event: boolean) => {
-    isDateFilActive(event);
-    if (event) {
-      updateQuery({ startDate: date?.from, endDate: date?.to });
-    } else {
-      updateQuery({ startDate: undefined, endDate: undefined });
-    }
+    setDateFilterActive(event);
+    event
+      ? updateQuery({ startDate: date?.from, endDate: date?.to })
+      : updateQuery({ startDate: undefined, endDate: undefined });
   };
 
-  const handleSlider = (event: any) => {
-    setCount(event[0]);
+  const handleDateChange = (event: any) => {
+    setDate(event);
+    handleDateFilter(true);
   };
+
+  const handleLevelFilter = (event: boolean) => {
+    setLevelFilterActive(event);
+    event ? updateQuery({ level: "Error" }) : updateQuery({ level: undefined });
+  };
+
+  const handleLevelChange = () => {};
 
   return (
     <div>
       <div className="flex flex-row w-full justify-between">
         <div className="flex flex-row gap-2 w-2/3">
           <Input
-            placeholder="Type something..."
+            placeholder="message, trace id, span id, commit..."
             name="searchText"
             onChange={handleSearch}
           />
           <Popover>
             <PopoverTrigger>
-              <Button variant="outline">Filters</Button>
+              <Button variant="outline">
+                Filter
+                <FilterIcon className="h-3 w-3 ml-2" />
+              </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-full">
-              <div className="flex flex-row gap-3 items-center">
+            <PopoverContent className="w-full flex flex-col gap-3">
+              <div className="flex gap-3 items-center">
                 <Switch
-                  checked={dateFilActive}
+                  checked={dateFilterActive}
                   onCheckedChange={handleDateFilter}
                 />
 
@@ -111,54 +130,37 @@ export const Filters = () => {
                         mode="range"
                         defaultMonth={date?.from}
                         selected={date}
-                        onSelect={setDate}
+                        onSelect={handleDateChange}
                         numberOfMonths={2}
                       />
                     </PopoverContent>
                   </Popover>
                 </div>
               </div>
-            </PopoverContent>
-          </Popover>
-        </div>
 
-        <div className="flex flex-row gap-2">
-          <ModeToggle />
-
-          <Button variant="outline" className="flex flex-row gap-2">
-            Add
-            <PlusCircleIcon className="w-4 h-4" />
-          </Button>
-
-          <Popover>
-            <PopoverTrigger>
-              <Button className="flex flex-row gap-2">
-                Generate
-                <Sparkles className="w-4 h-4" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent>
-              <p className="text-muted-foreground text-sm font-light p-3 border text-center">
-                Max limit has been set to 10,00,000 logs.
-              </p>
-              <div className="flex flex-col gap-3 mt-3">
-                <p className="text-base font-bold">Number of logs: {count}</p>
-                <Slider
-                  defaultValue={[count]}
-                  max={1000000}
-                  step={1000}
-                  onValueChange={handleSlider}
+              <div className="flex gap-3 items-center">
+                <Switch
+                  checked={levelFilterActive}
+                  onCheckedChange={handleLevelFilter}
                 />
-              </div>
-              <div className="w-full flex justify-center mt-4">
-                <Button>
-                  Submit
-                  <ChevronsRight className="ml-2 h-4 w-4" />
-                </Button>
+
+                <Select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="success">Success</SelectItem>
+                    <SelectItem value="error">Error</SelectItem>
+                    <SelectItem value="info">Information</SelectItem>
+                    <SelectItem value="warning">Warning</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </PopoverContent>
           </Popover>
         </div>
+
+        <CTA />
       </div>
     </div>
   );
