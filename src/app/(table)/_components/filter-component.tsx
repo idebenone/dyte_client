@@ -1,8 +1,11 @@
 "use client";
 
 import { useDispatch } from "react-redux";
-import { useState } from "react";
-import { setParams } from "@/components/redux/slices/querySlice";
+import { useState, useRef } from "react";
+import {
+  ParamsInterface,
+  setParams,
+} from "@/components/redux/slices/querySlice";
 
 import {
   Popover,
@@ -24,25 +27,43 @@ import { DateRange } from "react-day-picker";
 import { CalendarIcon } from "@radix-ui/react-icons";
 import { cn } from "@/lib/utils";
 import { addDays, format } from "date-fns";
-import { FilterIcon } from "lucide-react";
+import { FilterIcon, XCircle } from "lucide-react";
 
 import { CTA } from "./cta-component";
 
 export const Filters = () => {
   const dispatch = useDispatch();
+
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [filterType, setFilterType] = useState("message");
+  const [dateFilterActive, setDateFilterActive] = useState(false);
   const [date, setDate] = useState<DateRange | undefined>({
     from: new Date(),
     to: addDays(new Date(), 20),
   });
-  const [dateFilterActive, setDateFilterActive] = useState(false);
   const [levelFilterActive, setLevelFilterActive] = useState(false);
-  const [query, setQuery] = useState({
+  const [level, setLevel] = useState<string | undefined>();
+  const [query, setQuery] = useState<ParamsInterface>({
     page: 1,
     level: undefined,
     startDate: undefined,
     endDate: undefined,
-    searchText: undefined,
+    message: undefined,
+    resourceId: undefined,
+    traceId: undefined,
+    spanId: undefined,
+    commit: undefined,
+    parentId: undefined,
   });
+
+  const filterTypesMap = [
+    { id: "message", name: "Message", icon: "" },
+    { id: "resourceId", name: "Resource", icon: "" },
+    { id: "traceId", name: "Trace", icon: "" },
+    { id: "spanId", name: "Span", icon: "" },
+    { id: "commit", name: "Commit", icon: "" },
+    { id: "parentId", name: "Parent", icon: "" },
+  ];
 
   const updateQuery = (newQuery: any) => {
     const updatedQuery = { ...query, ...newQuery };
@@ -50,10 +71,32 @@ export const Filters = () => {
     dispatch(setParams(updatedQuery));
   };
 
+  const clearQuery = () => {
+    const emptyQuery: ParamsInterface = {
+      page: 1,
+      level: undefined,
+      startDate: undefined,
+      endDate: undefined,
+      message: undefined,
+      resourceId: undefined,
+      traceId: undefined,
+      spanId: undefined,
+      commit: undefined,
+      parentId: undefined,
+    };
+
+    setQuery(emptyQuery);
+    dispatch(setParams(emptyQuery));
+    setFilterType("message");
+  };
+
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    event.target.value
-      ? updateQuery({ searchText: event.target.value })
-      : updateQuery({ searchText: undefined });
+    const value = event.target.value;
+    const updatedQuery: any = {};
+    value
+      ? (updatedQuery[filterType] = value)
+      : (updatedQuery[filterType] = undefined);
+    updateQuery(updatedQuery);
   };
 
   const handleDateFilter = (event: boolean) => {
@@ -70,19 +113,31 @@ export const Filters = () => {
 
   const handleLevelFilter = (event: boolean) => {
     setLevelFilterActive(event);
-    event ? updateQuery({ level: "Error" }) : updateQuery({ level: undefined });
+    if (event) {
+      updateQuery({ level: level });
+    } else {
+      updateQuery({ level: undefined });
+    }
   };
 
-  const handleLevelChange = () => {};
+  const handleLevelChange = (event: string) => {
+    if (event) {
+      setLevel(event);
+      if (levelFilterActive) updateQuery({ level: event });
+    } else {
+      updateQuery({ level: undefined });
+    }
+  };
 
   return (
     <div>
       <div className="flex flex-row w-full justify-between">
         <div className="flex flex-row gap-2 w-2/3">
           <Input
-            placeholder="message, trace id, span id, commit..."
+            placeholder={`Query by type ` + filterType}
             name="searchText"
             onChange={handleSearch}
+            ref={inputRef}
           />
           <Popover>
             <PopoverTrigger>
@@ -144,12 +199,11 @@ export const Filters = () => {
                   onCheckedChange={handleLevelFilter}
                 />
 
-                <Select>
+                <Select onValueChange={handleLevelChange}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select Level" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="success">Success</SelectItem>
                     <SelectItem value="error">Error</SelectItem>
                     <SelectItem value="info">Information</SelectItem>
                     <SelectItem value="warning">Warning</SelectItem>
@@ -161,6 +215,33 @@ export const Filters = () => {
         </div>
 
         <CTA />
+      </div>
+
+      <div className="mt-2 flex gap-2 items-center">
+        {filterTypesMap.map((val, ind) => (
+          <p
+            key={ind}
+            className={cn(
+              "cursor-pointer py-1 px-2 font-semibold border text-xs rounded-lg",
+              filterType == val.id && "bg-none",
+              filterType !== val.id && "bg-muted"
+            )}
+            onClick={() => {
+              setFilterType(val.id);
+              if (inputRef.current) inputRef.current.value = "";
+            }}
+          >
+            {val.name}
+          </p>
+        ))}
+
+        <p
+          className="flex items-center cursor-pointer py-1 px-2 font-semibold border bg-red-800 text-xs rounded-lg"
+          onClick={clearQuery}
+        >
+          Reset
+          <XCircle className="h-3 w-3 ml-1" />
+        </p>
       </div>
     </div>
   );

@@ -29,7 +29,8 @@ export const columns: ColumnDef<Log>[] = [
   {
     accessorKey: "message",
     header: "Message",
-    maxSize: 200,
+    maxSize: 50,
+    size: 50,
   },
   {
     accessorKey: "parentId",

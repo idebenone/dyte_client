@@ -21,12 +21,19 @@ export function LogTable() {
   const logState = useSelector((state: RootState) => state.logs);
   const [modifiedLogs, setModifiedLogs] = useState([]);
 
-  const q =
+  const q1 =
     `page=${query.page} ` +
     `level=${query.level} ` +
     `startDate=${query.startDate} ` +
     `endDate=${query.endDate} ` +
-    `searchText=${query.searchText}`;
+    `message=${query.message}`;
+
+  const q2 =
+    `resourceId=${query.resourceId} ` +
+    `traceId=${query.traceId} ` +
+    `spanId=${query.spanId} ` +
+    `commit=${query.commit} ` +
+    `parentId=${query.parentId}`;
 
   const debouncedFetchData = debounce(async (queryParams) => {
     try {
@@ -54,7 +61,7 @@ export function LogTable() {
   }, [logState.logs]);
 
   return (
-    <div className="w-3/4">
+    <div className="p-4 w-full lg:w-3/4">
       <ConnectionStatus />
       <Filters />
       <TableComponent
@@ -63,9 +70,12 @@ export function LogTable() {
         dataCount={logState.count}
       />
 
-      <div className="mt-6">
+      <div className="mt-2">
         <p className="text-lg font-bold text-primary">QUERY STATE</p>
-        <Input className="mt-2" value={q} disabled />
+        <div className="border px-4 py-2 flex flex-col items-center text-sm font-normal text-green-700">
+          <p>{q1}</p>
+          <p>{q2}</p>
+        </div>
       </div>
     </div>
   );

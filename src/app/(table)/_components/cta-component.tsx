@@ -66,7 +66,7 @@ export const CTA = () => {
         </PopoverTrigger>
         <PopoverContent>
           <p className="text-muted-foreground text-sm font-light p-3 border text-center">
-            Max limit has been set to 1,00,000 logs.
+            Max limit has been set to 100,000,000 logs.
           </p>
           <div className="flex flex-col gap-3 mt-3">
             <p className="text-base font-bold">Number of logs: {count}</p>

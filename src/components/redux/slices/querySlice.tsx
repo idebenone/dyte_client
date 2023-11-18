@@ -1,11 +1,16 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-interface ParamsInterface {
+export interface ParamsInterface {
   page: number;
   level: string | undefined;
   startDate: string | undefined;
   endDate: string | undefined;
-  searchText: string | undefined;
+  message: string | undefined;
+  resourceId: string | undefined;
+  traceId: string | undefined;
+  spanId: string | undefined;
+  commit: string | undefined;
+  parentId: string | undefined;
 }
 
 const initialState: ParamsInterface = {
@@ -13,7 +18,12 @@ const initialState: ParamsInterface = {
   level: undefined,
   startDate: undefined,
   endDate: undefined,
-  searchText: undefined,
+  message: undefined,
+  resourceId: undefined,
+  traceId: undefined,
+  spanId: undefined,
+  commit: undefined,
+  parentId: undefined,
 };
 
 export const querySlice = createSlice({
