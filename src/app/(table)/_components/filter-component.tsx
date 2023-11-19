@@ -152,7 +152,7 @@ export const Filters = () => {
           <Popover>
             <PopoverTrigger>
               <Button variant="outline">
-                Filter
+                Sort
                 <FilterIcon className="h-3 w-3 ml-2" />
               </Button>
             </PopoverTrigger>
@@ -246,7 +246,7 @@ export const Filters = () => {
         ))}
 
         <p
-          className="flex items-center cursor-pointer py-1 px-2 font-semibold border bg-red-800 text-xs rounded-lg"
+          className="flex items-center cursor-pointer py-1 px-2 font-semibold border bg-red-400 text-xs rounded-lg"
           onClick={clearQuery}
         >
           Reset

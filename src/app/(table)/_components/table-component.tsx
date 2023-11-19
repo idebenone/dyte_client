@@ -149,7 +149,7 @@ export function TableComponent<TData, TValue>({
           Previous
         </Button>
         <p className="font-semibold text-sm text-muted-foreground">
-          {query.page} / {dataCount}
+          {query.page} / {Math.ceil(dataCount / 10)}
         </p>
         <Button
           variant="outline"

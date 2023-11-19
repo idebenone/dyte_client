@@ -5,6 +5,7 @@ import { RootState } from "@/components/redux/store";
 import { setLogs } from "@/components/redux/slices/logSlice";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useToast } from "@/components/ui/use-toast";
 import * as z from "zod";
 
 import { fetchLogs, singleLog } from "@/components/api";
@@ -48,6 +49,7 @@ const formSchema = z.object({
 });
 
 export const LogForm = () => {
+  const { toast } = useToast();
   const query = useSelector((state: RootState) => state.query);
   const loadingState = useSelector((state: RootState) => state.load);
   const dispatch = useDispatch();
@@ -69,22 +71,34 @@ export const LogForm = () => {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     dispatch(setState(true));
-    const response = await singleLog(values);
-    const logs = await fetchLogs(query);
-    dispatch(setLogs(logs));
-    form.reset({
-      level: "",
-      message: "",
-      resourceId: "",
-      timestamp: new Date(),
-      traceId: "",
-      spanId: "",
-      commit: "",
-      metadata: {
-        parentResourceId: "",
-      },
-    });
-    dispatch(setState(false));
+    try {
+      const response = await singleLog(values);
+      const logs = await fetchLogs(query);
+      dispatch(setLogs(logs));
+      form.reset({
+        level: "",
+        message: "",
+        resourceId: "",
+        timestamp: new Date(),
+        traceId: "",
+        spanId: "",
+        commit: "",
+        metadata: {
+          parentResourceId: "",
+        },
+      });
+      toast({
+        title: "Success",
+        description: "The log has been inserted!",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Something went wrong!",
+      });
+    } finally {
+      dispatch(setState(false));
+    }
   };
 
   return (
