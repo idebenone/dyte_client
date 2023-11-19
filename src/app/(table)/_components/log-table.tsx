@@ -7,13 +7,13 @@ import debounce from "lodash/debounce";
 
 import { Filters } from "./filter-component";
 import { TableComponent } from "./table-component";
-import { Input } from "@/components/ui/input";
 import { fetchLogs } from "@/components/api";
 
 import { columns } from "./columns";
 import { formatDate } from "@/components/utils";
 import { setLogs } from "@/components/redux/slices/logSlice";
 import { ConnectionStatus } from "@/app/_components/connection-status";
+import { setState } from "@/components/redux/slices/loadingSlice";
 
 export function LogTable() {
   const dispatch = useDispatch();
@@ -36,9 +36,11 @@ export function LogTable() {
     `parentId=${query.parentId}`;
 
   const debouncedFetchData = debounce(async (queryParams) => {
+    dispatch(setState({ loading: true }));
     try {
       const fetchedData: any = await fetchLogs(queryParams);
       dispatch(setLogs(fetchedData));
+      dispatch(setState({ loading: false }));
     } catch (error) {
       console.error("Error fetching logs:", error);
     }

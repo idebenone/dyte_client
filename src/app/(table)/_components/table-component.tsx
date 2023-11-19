@@ -36,6 +36,7 @@ export function TableComponent<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
   const dispatch = useDispatch();
   const query = useSelector((state: RootState) => state.query);
+  const loading = useSelector((state: RootState) => state.load);
 
   const [q, setQ] = useState({
     page: 1,
@@ -96,7 +97,7 @@ export function TableComponent<TData, TValue>({
             </TableHeader>
 
             <TableBody>
-              {table.getRowModel().rows?.length ? (
+              {!loading.loading && table.getRowModel().rows?.length ? (
                 table.getRowModel().rows.map((row) => (
                   <TableRow
                     key={row.id}
@@ -113,12 +114,23 @@ export function TableComponent<TData, TValue>({
                   </TableRow>
                 ))
               ) : (
-                <TableRow>
+                <TableRow className="h-full">
                   <TableCell
                     colSpan={columns.length}
-                    className="h-24 text-center"
+                    className="h-[450px] text-center"
                   >
-                    No results.
+                    {loading.loading ? (
+                      <div className="flex justify-center">
+                        <div className="equalizer">
+                          <div></div>
+                          <div></div>
+                          <div></div>
+                          <div></div>
+                        </div>
+                      </div>
+                    ) : (
+                      <p>No results.</p>
+                    )}
                   </TableCell>
                 </TableRow>
               )}
