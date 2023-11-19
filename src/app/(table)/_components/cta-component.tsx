@@ -26,10 +26,12 @@ export const CTA = () => {
   };
 
   const mockApiCall = async () => {
-    setIsCounterRunning(true);
-    const response = await generateLogs(count);
-    setApiFinished(true);
-    setIsCounterRunning(false);
+    if (count > 0) {
+      setIsCounterRunning(true);
+      const response = await generateLogs(count);
+      setApiFinished(true);
+      setIsCounterRunning(false);
+    }
   };
 
   useEffect(() => {
@@ -66,19 +68,21 @@ export const CTA = () => {
         </PopoverTrigger>
         <PopoverContent>
           <p className="text-muted-foreground text-sm font-light p-3 border text-center">
-            Max limit has been set to 100,000,000 logs.
+            Max limit has been set to 1 Million logs by author.
+            <br />
+            <small className="text-red-500">Estimated time ~5 minutes</small>
           </p>
           <div className="flex flex-col gap-3 mt-3">
             <p className="text-base font-bold">Number of logs: {count}</p>
             <Slider
               defaultValue={[count]}
-              max={100000}
+              max={1000000}
               step={1000}
               onValueChange={handleSlider}
             />
           </div>
           <div className="w-full flex flex-col justify-center mt-4">
-            <Button onClick={mockApiCall}>
+            <Button onClick={mockApiCall} disabled={count <= 0}>
               {isCounterRunning ? (
                 <div className="w-20">{counter} sec</div>
               ) : (

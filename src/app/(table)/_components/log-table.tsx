@@ -22,18 +22,18 @@ export function LogTable() {
   const [modifiedLogs, setModifiedLogs] = useState([]);
 
   const q1 =
-    `page=${query.page} ` +
-    `level=${query.level} ` +
-    `startDate=${query.startDate} ` +
-    `endDate=${query.endDate} ` +
-    `message=${query.message}`;
+    `{page=${query.page}} | ` +
+    `{level=${query.level}} | ` +
+    `{startDate=${query.startDate}} | ` +
+    `{endDate=${query.endDate}} | ` +
+    `{message=${query.message}}`;
 
   const q2 =
-    `resourceId=${query.resourceId} ` +
-    `traceId=${query.traceId} ` +
-    `spanId=${query.spanId} ` +
-    `commit=${query.commit} ` +
-    `parentId=${query.parentId}`;
+    `{resourceId=${query.resourceId}} | ` +
+    `{traceId=${query.traceId}} | ` +
+    `{spanId=${query.spanId}} | ` +
+    `{commit=${query.commit}} | ` +
+    `{parentId=${query.parentId}}`;
 
   const debouncedFetchData = debounce(async (queryParams) => {
     dispatch(setState({ loading: true }));
@@ -44,7 +44,7 @@ export function LogTable() {
     } catch (error) {
       console.error("Error fetching logs:", error);
     }
-  }, 300);
+  }, 500);
 
   useEffect(() => {
     debouncedFetchData(query);
@@ -74,7 +74,7 @@ export function LogTable() {
 
       <div className="mt-2">
         <p className="text-lg font-bold text-primary">QUERY STATE</p>
-        <div className="border px-4 py-2 flex flex-col items-center text-sm font-normal text-green-700">
+        <div className="border px-4 py-2 flex flex-col gap-1 items-center text-sm font-normal text-green-700">
           <p>{q1}</p>
           <p>{q2}</p>
         </div>

@@ -75,7 +75,7 @@ export function TableComponent<TData, TValue>({
   return (
     <div>
       <div className="rounded-md border mt-6">
-        <ScrollArea className="h-[500px] px-4">
+        <ScrollArea className="h-[550px] px-4">
           <Table>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (

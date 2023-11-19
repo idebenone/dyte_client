@@ -7,7 +7,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 
-import { fetchLogs, generateLogs, singleLog } from "@/components/api";
+import { fetchLogs, singleLog } from "@/components/api";
 
 import {
   Dialog,
@@ -30,6 +30,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 import { PlusCircleIcon } from "lucide-react";
+import { setState } from "@/components/redux/slices/loadingSlice";
 
 const formSchema = z.object({
   level: z.string().toLowerCase().min(1, { message: "Level is required" }),
@@ -48,6 +49,7 @@ const formSchema = z.object({
 
 export const LogForm = () => {
   const query = useSelector((state: RootState) => state.query);
+  const loadingState = useSelector((state: RootState) => state.load);
   const dispatch = useDispatch();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -66,9 +68,23 @@ export const LogForm = () => {
   });
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    dispatch(setState(true));
     const response = await singleLog(values);
     const logs = await fetchLogs(query);
     dispatch(setLogs(logs));
+    form.reset({
+      level: "",
+      message: "",
+      resourceId: "",
+      timestamp: new Date(),
+      traceId: "",
+      spanId: "",
+      commit: "",
+      metadata: {
+        parentResourceId: "",
+      },
+    });
+    dispatch(setState(false));
   };
 
   return (
@@ -213,7 +229,11 @@ export const LogForm = () => {
                     )}
                   />
                   <Button className="w-full" type="submit">
-                    Submit
+                    {loadingState.loading ? (
+                      <div>Creating...</div>
+                    ) : (
+                      <div>Submit</div>
+                    )}
                   </Button>
                 </form>
               </Form>

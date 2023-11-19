@@ -6,7 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Log Ingestor",
+  title: "Query Interface",
   description: "Made with ❤️ by Vineeth G",
 };
 

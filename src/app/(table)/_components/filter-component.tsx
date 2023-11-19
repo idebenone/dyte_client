@@ -30,6 +30,7 @@ import { addDays, format } from "date-fns";
 import { FilterIcon, XCircle } from "lucide-react";
 
 import { CTA } from "./cta-component";
+import { debounce } from "lodash";
 
 export const Filters = () => {
   const dispatch = useDispatch();
@@ -65,12 +66,6 @@ export const Filters = () => {
     { id: "parentId", name: "Parent", icon: "" },
   ];
 
-  const updateQuery = (newQuery: any) => {
-    const updatedQuery = { ...query, ...newQuery };
-    setQuery(updatedQuery);
-    dispatch(setParams(updatedQuery));
-  };
-
   const clearQuery = () => {
     const emptyQuery: ParamsInterface = {
       page: 1,
@@ -87,16 +82,30 @@ export const Filters = () => {
 
     setQuery(emptyQuery);
     dispatch(setParams(emptyQuery));
+    if (inputRef.current) inputRef.current.value = "";
     setFilterType("message");
   };
 
+  const updateQuery = (newQuery: any) => {
+    const updatedQuery = { ...query, ...newQuery };
+    setQuery(updatedQuery);
+    dispatch(setParams(updatedQuery));
+  };
+
+  const debouncedQueryUpdate = debounce(async (newQuery) => {
+    const updatedQuery = { ...query, ...newQuery };
+    setQuery(updatedQuery);
+    dispatch(setParams(updatedQuery));
+  }, 500);
+
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const value = event.target.value;
+    const value = event.target.value.trim();
     const updatedQuery: any = {};
     value
       ? (updatedQuery[filterType] = value)
       : (updatedQuery[filterType] = undefined);
-    updateQuery(updatedQuery);
+    // updateQuery(updatedQuery);
+    debouncedQueryUpdate(updatedQuery);
   };
 
   const handleDateFilter = (event: boolean) => {
@@ -108,7 +117,8 @@ export const Filters = () => {
 
   const handleDateChange = (event: any) => {
     setDate(event);
-    handleDateFilter(true);
+    if (event && dateFilterActive)
+      updateQuery({ startDate: event?.from, endDate: event?.to });
   };
 
   const handleLevelFilter = (event: boolean) => {
